@@ -337,7 +337,9 @@ class _FormElementKeywords(KeywordGroup):
 
     def click_button_with_same_page(self, locator):
         """Click button but don't open another page
-           the usage is the same as 'click button'"""
+        the usage is the same as 'click button'
+        """
         self._info("change target's value to '_self'")
+        self._current_browser().execute_script("arguments[0].target='_self'", self._element_find("//base", True, True))
         self._current_browser().execute_script("arguments[0].target='_self'", self._element_find(locator, True, True))
         self.click_button(locator)
