@@ -657,3 +657,30 @@ return !element.dispatchEvent(evt);
         self._info("Current page does not contain %s '%s'."
                    % (element_name, locator))
 
+    def click_element_with_same_page(self, locator):
+        """Click element but don't open another page
+           the usage is the same as 'click element'"""
+        self._info("change target's value to '_self'")
+        self._current_browser().execute_script("arguments[0].target='_self'", self._element_find(locator, True, True))
+        self.click_element(locator)
+
+    def double_click_element_with_same_page(self, locator):
+        """double click element but don't open another page
+           the usage is the same as 'double click element'"""
+        self._info("change target's value to '_self'")
+        self._current_browser().execute_script("arguments[0].target='_self'", self._element_find(locator, True, True))
+        self.double_click_element(locator)
+
+    def click_link_with_same_page(self, locator):
+        """Click link but don't open another page
+           the usage is the same as 'click link'"""
+        self._info("change target's value to '_self'")
+        self._current_browser().execute_script("arguments[0].target='_self'", self._element_find(locator, True, True))
+        self.click_link(locator)
+
+    def click_image_with_same_page(self, locator):
+        """Click image but don't open another page
+           the usage is the same as 'click image'"""
+        self._info("change target's value to '_self'")
+        self._current_browser().execute_script("arguments[0].target='_self'", self._element_find(locator, True, True))
+        self.click_image(locator)
