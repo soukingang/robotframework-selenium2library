@@ -330,6 +330,9 @@ class _FormElementKeywords(KeywordGroup):
         tag = element.tag_name.lower()
         return tag == 'input' or tag == 'select' or tag == 'textarea' or tag == 'button'
 
+    def _is_element_present(self, locator, tag=None):
+        return (self._element_find(locator, True, False, tag=tag) != None)
+
     def input_text_for_readonly(self, locator, text):
         """type the given text into readonly textfield identified by `locator` """
         self._info("Typing text '%s' into readonly text field '%s'" % (text, locator))
@@ -340,6 +343,7 @@ class _FormElementKeywords(KeywordGroup):
         the usage is the same as 'click button'
         """
         self._info("change target's value to '_self'")
-        self._current_browser().execute_script("arguments[0].target='_self'", self._element_find("//base", True, True))
+        if self._is_element_present("//base"):
+            self._current_browser().execute_script("arguments[0].target='_self'", self._element_find("//base", True, True))
         self._current_browser().execute_script("arguments[0].target='_self'", self._element_find(locator, True, True))
         self.click_button(locator)
