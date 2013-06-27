@@ -17,9 +17,10 @@ BROWSER_NAMES = {'ff': "_make_ff",
                  'gc': "_make_chrome",
                  'chrome': "_make_chrome",
                  'opera' : "_make_opera",
+                 'phantomjs' : "_make_phantomjs",
                  'htmlunit' : "_make_htmlunit",
                  'htmlunitwithjs' : "_make_htmlunitwithjs",
-                 'phantomjs' : "_make_phantomjs"
+                 'ios' : "_make_ios"
                 }
 
 class _BrowserManagementKeywords(KeywordGroup):
@@ -75,10 +76,11 @@ class _BrowserManagementKeywords(KeywordGroup):
         | gc               | Google Chrome |
         | chrome           | Google Chrome |
         | opera            | Opera         |
+        | phantomjs        | PhantomJS     |
         | htmlunit         | HTMLUnit      |
         | htmlunitwithjs   | HTMLUnit with Javascipt support |
-        | phantomjs        | PhantomJS |
-
+        | ios              | IOS with PhantomJS support  |
+        
 
         Note, that you will encounter strange behavior, if you open
         multiple Internet Explorer browser instances. That is also why
@@ -344,7 +346,7 @@ class _BrowserManagementKeywords(KeywordGroup):
         """
         old_timeout = self.get_selenium_timeout()
         self._timeout_in_secs = robot.utils.timestr_to_secs(seconds)
-        for browser in self._cache.browsers:
+        for browser in self._cache.get_open_browsers():
             browser.set_script_timeout(self._timeout_in_secs)
         return old_timeout
 
@@ -436,6 +438,15 @@ class _BrowserManagementKeywords(KeywordGroup):
         return self._generic_make_browser(webdriver.Opera, 
                 webdriver.DesiredCapabilities.OPERA, remote, desired_capabilities)
 
+    def _make_phantomjs(self , remote , desired_capabilities , profile_dir):
+        return self._generic_make_browser(webdriver.PhantomJS, 
+                webdriver.DesiredCapabilities.PHANTOMJS, remote, desired_capabilities)
+
+    def _make_ios(self , remote , desired_capabilities , profile_dir):
+    	dcap = dict(webdriver.common.desired_capabilities.DesiredCapabilities.PHANTOMJS)
+    	dcap["phantomjs.page.settings.userAgent"] = 'Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_0 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7A341 Safari/528.16'
+    	return webdriver.PhantomJS(desired_capabilities=dcap)
+
     def _make_htmlunit(self , remote , desired_capabilities , profile_dir):
         return self._generic_make_browser(webdriver.Remote, 
                 webdriver.DesiredCapabilities.HTMLUNIT, remote, desired_capabilities)
@@ -444,9 +455,6 @@ class _BrowserManagementKeywords(KeywordGroup):
         return self._generic_make_browser(webdriver.Remote, 
                 webdriver.DesiredCapabilities.HTMLUNITWITHJS, remote, desired_capabilities)
 
-    def _make_phantomjs(self , remote , desired_capabilities , profile_dir):
-        return self._generic_make_browser(webdriver.PhantomJS, 
-                webdriver.DesiredCapabilities.PHANTOMJS, remote, desired_capabilities)
     
     def _generic_make_browser(self, webdriver_type , desired_cap_type, remote_url, desired_caps):
         '''most of the make browser functions just call this function which creates the 
@@ -471,5 +479,21 @@ class _BrowserManagementKeywords(KeywordGroup):
             for cap in capabilities_string.split(","):
                 (key, value) = cap.split(":")
                 desired_capabilities[key.strip()] = value.strip()
+        print desired_capabilities
         return desired_capabilities
     
+    def get_verifycode(self, name):
+        import memcache
+        mc = memcache.Client(['10.3.18.49:12345'])
+        if (not mc.get(name)):
+            mc = memcache.Client(['10.3.18.55:12345'])
+            return mc.get(name)
+        else:
+            return mc.get(name)
+
+    def capture_page_screenshot_and_log_source(self, loglevel='INFO'):
+        self.log_source(loglevel)
+        from robot.libraries import BuiltIn
+        BUILTIN = BuiltIn.BuiltIn()
+        BUILTIN.run_keyword("Capture Page Screenshot")
+
